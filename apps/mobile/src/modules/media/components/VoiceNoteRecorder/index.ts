@@ -1,0 +1,1 @@
+export { VoiceNoteRecorder } from './VoiceNoteRecorder';

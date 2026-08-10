@@ -1,0 +1,1 @@
+export { VoiceNotePlayer } from './VoiceNotePlayer';

@@ -1,0 +1,18 @@
+{
+	"name": "wudapp",
+	"version": "0.1.0",
+	"private": true,
+	"description": "Wudapp — local-network chat, media & calls",
+	"scripts": {
+		"dev": "turbo run dev --parallel",
+		"build": "turbo run build",
+		"lint": "turbo run lint",
+		"typecheck": "turbo run typecheck",
+		"migrate": "turbo run migrate --filter=@wudapp/server"
+	},
+	"workspaces": ["apps/*", "packages/*"],
+	"devDependencies": {
+		"turbo": "^2.10.9"
+	},
+	"packageManager": "pnpm@11.21.0"
+}
