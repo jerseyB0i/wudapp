@@ -16,41 +16,54 @@ import { createSocketServer } from './infrastructure/socket.server.js';
 import type { TypedIO } from './infrastructure/socket.server.js';
 
 export async function buildApp() {
-  const fastify = Fastify({ logger: true });
+	const fastify = Fastify({ logger: true });
 
-  await fastify.register(fastifyCors, { origin: '*' });
-  await fastify.register(fastifyJwt, { secret: config.JWT_SECRET });
-  await fastify.register(fastifyMultipart, { limits: { fileSize: config.MAX_VIDEO_BYTES } });
-  await fastify.register(fastifyStatic, {
-    root: path.resolve(config.UPLOADS_DIR),
-    prefix: '/uploads/',
-  });
+	await fastify.register(fastifyCors, { origin: '*' });
+	await fastify.register(fastifyJwt, { secret: config.JWT_SECRET });
+	await fastify.register(fastifyMultipart, {
+		limits: { fileSize: config.MAX_VIDEO_BYTES }
+	});
+	await fastify.register(fastifyStatic, {
+		root: path.resolve(config.UPLOADS_DIR),
+		prefix: '/uploads/'
+	});
 
-  fastify.setErrorHandler(errorHandler);
+	fastify.setErrorHandler(errorHandler);
 
-  return fastify;
+	return fastify;
 }
 
 export async function buildSocketServer(httpServer: any): Promise<TypedIO> {
-  const io = createSocketServer(httpServer);
+	const io = createSocketServer(httpServer);
 
-  // Auth middleware for Socket.IO
-  io.use((socket, next) => {
-    const token = socket.handshake.auth?.token;
-    if (!token) return next(new Error('Unauthorized'));
-    // JWT verify is done inline here — fastify jwt is not available on socket
-    next();
-  });
+	// Auth middleware for Socket.IO
+	io.use((socket, next) => {
+		const token = socket.handshake.auth?.token;
+		if (!token) return next(new Error('Unauthorized'));
+		// JWT verify is done inline here — fastify jwt is not available on socket
+		next();
+	});
 
-  registerMessagingGateway(io);
-  registerCallsGateway(io);
+	registerMessagingGateway(io);
+	registerCallsGateway(io);
 
-  return io;
+	return io;
 }
 
 export async function registerRoutes(fastify: any, io: TypedIO) {
-  fastify.register(authRouter, { prefix: '/api/auth' });
-  fastify.register((f: any) => messagingRouter(f, { io }), { prefix: '/api' });
-  fastify.register((f: any) => mediaRouter(f, { io }), { prefix: '/api/media' });
-  fastify.register(callsRouter, { prefix: '/api' });
+	// Health check — no auth required
+	fastify.get('/health', async () => ({
+		status: 'ok',
+		version: '1.0.0',
+		timestamp: new Date().toISOString()
+	}));
+
+	fastify.register(authRouter, { prefix: '/api/auth' });
+	fastify.register((f: any) => messagingRouter(f, { io }), {
+		prefix: '/api'
+	});
+	fastify.register((f: any) => mediaRouter(f, { io }), {
+		prefix: '/api/media'
+	});
+	fastify.register(callsRouter, { prefix: '/api' });
 }
