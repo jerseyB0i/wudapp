@@ -1,8 +1,12 @@
 interface Props {
-  audioMuted: boolean; videoMuted: boolean; speakerOn: boolean;
-  onToggleAudio: () => void; onToggleVideo: () => void;
-  onToggleSpeaker: () => void; onEndCall: () => void;
+	audioMuted: boolean;
+	videoMuted: boolean;
+	speakerOn: boolean;
+	onToggleAudio: () => void;
+	onToggleVideo: () => void;
+	onToggleSpeaker: () => void;
+	onEndCall: () => void;
 }
-export function CallControls(props: Props) {
-  return <div>CallControls</div>;
+export function CallControls(_props: Props) {
+	return <div>CallControls</div>;
 }
